@@ -58,7 +58,7 @@ namespace FarmCentralWebApp.Controllers
                         }
                         else
                         {
-                            ViewBag.UserError = login.Email+" role is invalid. Please try again.";
+                            ViewBag.UserError = login.Email + " role is invalid. Please try again.";
                             return View(login);
                         }
                     }
@@ -102,7 +102,7 @@ namespace FarmCentralWebApp.Controllers
             }
         }
 
-        public ActionResult ResetFarmerPassword()
+        public ActionResult ResetPassword()
         {
             return View();
         }
@@ -110,7 +110,7 @@ namespace FarmCentralWebApp.Controllers
         // POST: UsersController/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ResetFarmerPassword([Bind("Email,Password")] ResetFarmerPassword reset)
+        public ActionResult ResetPassword([Bind("Email,Password,ConfirmPassword")] ResetPassword reset)
         {
 
             List<User> user;
@@ -118,13 +118,34 @@ namespace FarmCentralWebApp.Controllers
             user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
 
             // linq query to find the farmers password
-            var filter = user.Where(x => x.Email.ToLower().Equals(reset.Email.ToLower())).Select(x => new { x.UserId, x.Password }).FirstOrDefault();
+            int id = user.Where(x => x.Email.ToLower().Equals(reset.Email.ToLower())).Select(x => x.UserId).FirstOrDefault();
+            //string password = user.Where(x => x.Email.ToLower().Equals(reset.Email.ToLower())).Select(x => x.Password).FirstOrDefault();
 
             // update and hash the farmers password to new password
-            httpResponse = Global.httpClient.PutAsJsonAsync(String.Format("Users/{0}", filter.UserId), reset).Result; //// TEST THIS !!
+            user = user.Where(x => x.UserId == id).ToList();
 
+            User updatedUser = new User();
+            foreach (var x in user)
+            {
+                updatedUser.UserId = x.UserId;
+                updatedUser.Name = x.Name;
+                updatedUser.Surname = x.Surname;
+                updatedUser.Email = x.Email;
+                updatedUser.Role = x.Role;
+                updatedUser.Password = BCrypt.Net.BCrypt.HashPassword(reset.Password);
+            }
 
-            return RedirectToAction("Index", "Home"); // this will be the home nav page for the employee
+            httpResponse = Global.httpClient.PutAsJsonAsync(String.Format("Users/{0}", id), updatedUser).Result; //// TEST THIS !!
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                return RedirectToAction("Index", "Home"); // this will be the home nav page for the employee
+            }
+            else
+            {
+                ViewBag.UserUpdatePassword = "Failed to update password.";
+                return View();
+            }
         }
     }
 
