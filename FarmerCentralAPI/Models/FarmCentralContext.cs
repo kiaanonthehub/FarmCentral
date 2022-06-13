@@ -26,7 +26,7 @@ namespace FarmerCentralAPI.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("DefaultConnection");
+               // optionsBuilder.UseSqlServer( "SqlConnection");
             }
         }
 
