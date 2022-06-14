@@ -13,7 +13,9 @@ namespace FarmCentralWebApp
         // static fields
         public static string currentUserRole;
         public static int currentUserId;
+        public static int EmployeeUserId;
         public static List<SelectListItem> lstProductType = new List<SelectListItem>();
+        public static List<SelectListItem> lstFarmerNames = new List<SelectListItem>();
 
         // httpClient object
         public static HttpClient httpClient = new HttpClient();
@@ -53,6 +55,21 @@ namespace FarmCentralWebApp
                 user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
 
                 currentUserId = user.Where(x => x.Email.ToLower().Trim().Equals(email.ToLower().Trim())).Select(x => x.UserId).FirstOrDefault();
+            }
+        }
+
+        public static void GetFarmers()
+        {
+            List<User> user;
+            HttpResponseMessage httpResponse = Global.httpClient.GetAsync("Users").Result;
+            user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                var farmers = user.Where(x => x.Role.Equals("Farmer")).ToList();
+
+                lstFarmerNames.Clear();
+                farmers.ForEach(x => lstFarmerNames.Add(new SelectListItem { Text = x.Name, Value = x.Name }));
             }
         }
 

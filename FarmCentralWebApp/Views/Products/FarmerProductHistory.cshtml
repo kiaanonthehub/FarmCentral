@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<FarmCentralWebApp.ViewModels.ViewHistory>
 
 @{
-    ViewData["Title"] = "ViewHistory";
+    ViewData["Title"] = "FarmerProductHistory";
 }
 
-<h1>ViewHistory</h1>
+<h1>FarmerProductHistory</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -40,7 +40,7 @@
                 @Html.DisplayFor(modelItem => item.Quantity)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ProductDate)
+                @Html.DisplayFor(modelItem => item.ProductDate.ToString("D"))
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
