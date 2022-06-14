@@ -54,7 +54,7 @@ namespace FarmCentralWebApp.Controllers
                     {
                         if (userRole.Equals(login.Role))
                         {
-                            Global.currentUserId = userId;
+                            Global.GetUserId(userEmail.Email);
                             Global.currentUserRole = userRole;
                             return RedirectToAction("Index", "Home"); // this will be the home nav page for the employee
                         }
@@ -95,9 +95,13 @@ namespace FarmCentralWebApp.Controllers
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
                 HttpResponseMessage httpResponse = Global.httpClient.PostAsJsonAsync("Users", user).Result;
-
-                return RedirectToAction("Create", "UsersProducts"); // redirect the employee to add a product or nav page???
-            }
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    Global.GetUserId(user.Email);
+                    return RedirectToAction("AddProduct", "Products"); // redirect the employee to add a product or nav page???
+                }
+                else { return View(user); }
+                }
             catch
             {
                 return View();

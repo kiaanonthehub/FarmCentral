@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
@@ -10,8 +11,8 @@ namespace FarmCentralWebApp
     public static class Global
     {
         // static fields
-        public static string currentUserRole = null;
-        public static int currentUserId = 0;
+        public static string currentUserRole;
+        public static int currentUserId;
         public static List<SelectListItem> lstProductType = new List<SelectListItem>();
 
         // httpClient object
@@ -41,6 +42,18 @@ namespace FarmCentralWebApp
 
             lstProductType.Clear();
             product.ForEach(x => lstProductType.Add(new SelectListItem { Text = x.ProductType1, Value = x.ProductType1 }));
+        }
+
+        public static void GetUserId(String email)
+        {
+            if (email != null)
+            {
+                List<User> user;
+                HttpResponseMessage httpResponse = Global.httpClient.GetAsync("Users").Result;
+                user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
+
+                currentUserId = user.Where(x => x.Email.ToLower().Trim().Equals(email.ToLower().Trim())).Select(x => x.UserId).FirstOrDefault();
+            }
         }
 
     }

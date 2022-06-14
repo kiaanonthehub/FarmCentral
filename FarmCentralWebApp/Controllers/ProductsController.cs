@@ -1,6 +1,10 @@
-﻿using FarmCentralWebApp.ViewModels;
+﻿using FarmCentralWebApp.Models;
+using FarmCentralWebApp.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 
 namespace FarmCentralWebApp.Controllers
@@ -36,14 +40,46 @@ namespace FarmCentralWebApp.Controllers
         {
             try
             {
-                Product product = new Product(); 
+                List<Product> listProducts = new List<Product>();
+                List<ProductType> listProductType = new List<ProductType>();
+
+                Console.WriteLine(Global.currentUserId);
+                // instantiate HttpResponseMessage object
+                HttpResponseMessage httpResponse;
+
+                // instantiate model objects
+                Product product = new Product();
+                product.ProductName = storeProduct.ProductName;
+                httpResponse = Global.httpClient.PostAsJsonAsync("Products", product).Result; // PUT
+                httpResponse = Global.httpClient.GetAsync("Products").Result; // GET
+                listProducts = httpResponse.Content.ReadAsAsync<List<Product>>().Result; 
+                product.ProductId = listProducts.Where(x=> x.ProductName == storeProduct.ProductName).Select(x=> x.ProductId).FirstOrDefault();
+
+                // instantiate model objects
+                ProductType productType = new ProductType();
+                productType.ProductType1 = storeProduct.ProductType;
+                httpResponse = Global.httpClient.PostAsJsonAsync("ProductTypes", productType).Result; // PUT
+                httpResponse = Global.httpClient.GetAsync("ProductTypes").Result; // GET
+                listProductType = httpResponse.Content.ReadAsAsync<List<ProductType>>().Result;
+                productType.ProductTypeId = listProductType.Where(x => x.ProductType1 == storeProduct.ProductType).Select(x => x.ProductTypeId).FirstOrDefault();
 
 
-                HttpResponseMessage httpResponse = Global.httpClient.PostAsJsonAsync("Products", user).Result;
-                HttpResponseMessage httpResponse = Global.httpClient.PostAsJsonAsync("ProductTypes", user).Result;
-                HttpResponseMessage httpResponse = Global.httpClient.PostAsJsonAsync("UserProducts", user).Result;
+                UsersProduct usersProduct = new UsersProduct();
+                usersProduct.UserId = Global.currentUserId;
+                usersProduct.ProductId = product.ProductId;
+                usersProduct.ProductTypeId = productType.ProductTypeId;
+                usersProduct.Quantity = storeProduct.Quantity;
+                usersProduct.ProductType = storeProduct.ProductType;
+                usersProduct.ProductDate = storeProduct.ProductDate;
+                
+                httpResponse = Global.httpClient.PostAsJsonAsync("UsersProducts", usersProduct).Result;
 
-                return RedirectToAction(nameof(Index));
+                if (httpResponse.IsSuccessStatusCode)
+                {
+
+                    return RedirectToAction("Index", "Home");
+                }
+                else { return View(storeProduct); }
             }
             catch
             {
