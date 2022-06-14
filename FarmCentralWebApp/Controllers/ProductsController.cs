@@ -19,12 +19,12 @@ namespace FarmCentralWebApp.Controllers
             return View();
         }
 
-        public IActionResult ViewHistory() 
+        public IActionResult ViewHistory()
         {
             HttpResponseMessage httpResponse;
             List<UsersProduct> usersProduct;
             List<Product> product;
-            List<ViewHistory> viewHistories = new List<ViewHistory>(); 
+            List<ViewHistory> viewHistories = new List<ViewHistory>();
             ViewHistory vh = new ViewHistory();
 
             // GET
@@ -59,12 +59,62 @@ namespace FarmCentralWebApp.Controllers
             });
 
             // filter the list only for the current user to see his/her details
-            return View(viewHistories.Where(x=> x.UserId.Equals(Global.currentUserId)).ToList());
+            return View(viewHistories.Where(x => x.UserId.Equals(Global.currentUserId)).ToList());
         }
 
         // GET: ProductsController/Details/5
         public ActionResult Details(int id)
         {
+            return View();
+        }
+
+        public ActionResult AddProductType()
+        {
+            return View();
+        }
+
+        // POST: Products/AddProductType
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AddProductType([Bind("ProductType1")] StoreProductType storeProductType)
+        {
+            if (ModelState.IsValid)
+            {
+                HttpResponseMessage httpResponse;
+                // api call to get the existing database list of productTypes
+                List<ProductType> productTypes;
+                httpResponse = Global.httpClient.GetAsync("ProductTypes").Result;
+                productTypes = httpResponse.Content.ReadAsAsync<List<ProductType>>().Result;
+
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    // filter to check if product type exists
+                    var filterProdcutTypes = productTypes.Where(x => x.ProductType1.Equals(storeProductType)).ToList().FirstOrDefault();
+
+                    if (filterProdcutTypes == null)
+                    {
+                        // add product to the database with api post
+                        httpResponse = Global.httpClient.PostAsJsonAsync("ProductTypes", storeProductType).Result;
+                        if (httpResponse.IsSuccessStatusCode)
+                        {
+                            return RedirectToAction("AddProduct","Products");
+                        }
+                        else 
+                        {
+                            ViewBag.ProductError = "Failed to add "+storeProductType.ProductType1;
+                            return View();
+                        }
+                    }
+                    else
+                    {
+                        ViewBag.ProductError = storeProductType.ProductType1+ " already exists. Please add a different type.";
+                        return View();
+                    }
+                }
+            }
+
             return View();
         }
 
@@ -95,8 +145,8 @@ namespace FarmCentralWebApp.Controllers
                 product.ProductName = storeProduct.ProductName;
                 httpResponse = Global.httpClient.PostAsJsonAsync("Products", product).Result; // PUT
                 httpResponse = Global.httpClient.GetAsync("Products").Result; // GET
-                listProducts = httpResponse.Content.ReadAsAsync<List<Product>>().Result; 
-                product.ProductId = listProducts.Where(x=> x.ProductName == storeProduct.ProductName).Select(x=> x.ProductId).FirstOrDefault();
+                listProducts = httpResponse.Content.ReadAsAsync<List<Product>>().Result;
+                product.ProductId = listProducts.Where(x => x.ProductName == storeProduct.ProductName).Select(x => x.ProductId).FirstOrDefault();
 
                 // instantiate model objects
                 ProductType productType = new ProductType();
@@ -114,7 +164,7 @@ namespace FarmCentralWebApp.Controllers
                 usersProduct.Quantity = storeProduct.Quantity;
                 usersProduct.ProductType = storeProduct.ProductType;
                 usersProduct.ProductDate = storeProduct.ProductDate;
-                
+
                 httpResponse = Global.httpClient.PostAsJsonAsync("UsersProducts", usersProduct).Result;
 
                 if (httpResponse.IsSuccessStatusCode)

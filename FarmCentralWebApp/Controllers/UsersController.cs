@@ -29,7 +29,7 @@ namespace FarmCentralWebApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Login([Bind("Email,Password,Role")] Login login)
         {
-
+            ViewData["Roles"] = Global.lstRoles;
             List<User> user;
             HttpResponseMessage httpResponse = Global.httpClient.GetAsync("Users").Result;
             user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
