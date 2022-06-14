@@ -19,6 +19,49 @@ namespace FarmCentralWebApp.Controllers
             return View();
         }
 
+        public IActionResult ViewHistory() 
+        {
+            HttpResponseMessage httpResponse;
+            List<UsersProduct> usersProduct;
+            List<Product> product;
+            List<ViewHistory> viewHistories = new List<ViewHistory>(); 
+            ViewHistory vh = new ViewHistory();
+
+            // GET
+            httpResponse = Global.httpClient.GetAsync("UsersProducts").Result;
+            usersProduct = httpResponse.Content.ReadAsAsync<List<UsersProduct>>().Result;
+            //GET
+            httpResponse = Global.httpClient.GetAsync("Products").Result;
+            product = httpResponse.Content.ReadAsAsync<List<Product>>().Result;
+
+            // https://stackoverflow.com/questions/6253656/how-do-i-join-two-lists-using-linq-or-lambda-expressions
+            var joinTables = usersProduct.Join(product, x => x.ProductId, y => y.ProductId,
+                (x, y) => new
+                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId }).ToList();
+
+            //foreach (var i in joinTables)
+            //{
+            //    vh.ProductName = i.ProductName;
+            //    vh.Quantity = i.Quantity;
+            //    vh.ProductType = i.ProductType;
+            //    vh.ProductDate = i.ProductDate;
+            //    viewHistories.Add(vh);
+            //}
+
+            joinTables.ForEach(i =>
+            {
+                vh.UserId = i.UserId;
+                vh.ProductName = i.ProductName;
+                vh.Quantity = i.Quantity;
+                vh.ProductType = i.ProductType;
+                vh.ProductDate = i.ProductDate;
+                viewHistories.Add(vh);
+            });
+
+            // filter the list only for the current user to see his/her details
+            return View(viewHistories.Where(x=> x.UserId.Equals(Global.currentUserId)).ToList());
+        }
+
         // GET: ProductsController/Details/5
         public ActionResult Details(int id)
         {
@@ -76,7 +119,6 @@ namespace FarmCentralWebApp.Controllers
 
                 if (httpResponse.IsSuccessStatusCode)
                 {
-
                     return RedirectToAction("Index", "Home");
                 }
                 else { return View(storeProduct); }
