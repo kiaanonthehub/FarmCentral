@@ -37,6 +37,7 @@ namespace FarmCentralWebApp.Controllers
             var userEmail = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).FirstOrDefault();
             var userPassword = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.Password).FirstOrDefault();
             var userRole = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.Role).FirstOrDefault();
+            var userId = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.UserId).FirstOrDefault();
 
             if (userEmail == null)
             {
@@ -53,6 +54,7 @@ namespace FarmCentralWebApp.Controllers
                     {
                         if (userRole.Equals(login.Role))
                         {
+                            Global.currentUserId = userId;
                             Global.currentUserRole = userRole;
                             return RedirectToAction("Index", "Home"); // this will be the home nav page for the employee
                         }
@@ -148,6 +150,9 @@ namespace FarmCentralWebApp.Controllers
             }
         }
     }
-
-
 }
+
+/*
+ * Code Attribution
+ * Aesthetics
+ */

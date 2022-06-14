@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using FarmCentralWebApp.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -8,7 +9,10 @@ namespace FarmCentralWebApp
 {
     public static class Global
     {
-        public static string currentUserRole;
+        // static fields
+        public static string currentUserRole = null;
+        public static int currentUserId = 0;
+        public static List<SelectListItem> lstProductType = new List<SelectListItem>();
 
         // httpClient object
         public static HttpClient httpClient = new HttpClient();
@@ -27,5 +31,19 @@ namespace FarmCentralWebApp
             new SelectListItem {Text = "Employee", Value = "Employee" },
             new SelectListItem {Text = "Farmer" , Value = "Farmer"},
         };
+
+
+        public static void populateProductType()
+        {
+            List<ProductType> product;
+            HttpResponseMessage httpResponse = Global.httpClient.GetAsync("ProductTypes").Result;
+            product = httpResponse.Content.ReadAsAsync<List<ProductType>>().Result;
+
+            lstProductType.Clear();
+            product.ForEach(x => lstProductType.Add(new SelectListItem { Text = x.ProductType1, Value = x.ProductType1 }));
+        }
+
     }
+
+
 }
