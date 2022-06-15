@@ -50,7 +50,7 @@ namespace FarmCentralWebApp.Controllers
             viewHistories.Clear();
             joinTables.ForEach(i =>
             {
-                vh = new ViewHistory(i.UserId, i.ProductName, i.Quantity,i.ProductType, i.ProductDate);
+                vh = new ViewHistory(i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
                 viewHistories.Add(vh);
             });
 
@@ -222,7 +222,7 @@ namespace FarmCentralWebApp.Controllers
             List<UsersProduct> usersProduct;
             List<Product> product;
             List<ViewHistory> viewHistories = new List<ViewHistory>();
-            ViewHistory vh = new ViewHistory();
+            ViewHistory vh;
 
             // GET
             httpResponse = Global.httpClient.GetAsync("UsersProducts").Result;
@@ -236,29 +236,17 @@ namespace FarmCentralWebApp.Controllers
                 (x, y) => new
                 { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId }).ToList();
 
-            //foreach (var i in joinTables)
-            //{
-            //    vh.ProductName = i.ProductName;
-            //    vh.Quantity = i.Quantity;
-            //    vh.ProductType = i.ProductType;
-            //    vh.ProductDate = i.ProductDate;
-            //    viewHistories.Add(vh);
-            //}
 
+            viewHistories.Clear();
             joinTables.ForEach(i =>
             {
-                vh.UserId = i.UserId;
-                vh.ProductName = i.ProductName;
-                vh.Quantity = i.Quantity;
-                vh.ProductType = i.ProductType;
-                vh.ProductDate = i.ProductDate;
+                vh = new ViewHistory(i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
                 viewHistories.Add(vh);
             });
 
             // filter the list only for the current user to see his/her details
             return View(viewHistories.Where(x => x.UserId.Equals(Global.EmployeeUserId)).ToList());
         }
-
 
         // GET: Products/SelectFarmer
         public IActionResult SelectFarmer()
@@ -271,31 +259,151 @@ namespace FarmCentralWebApp.Controllers
         // POST: Products/SelectFarmer
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult SelectFarmer([Bind("Name")] FilterByEmployee filterByEmployee)
+        public ActionResult SelectFarmer([Bind("Name")] FilterByEmployee filterByEmployee)
         {
             Global.GetFarmers();
             ViewData["FarmerName"] = Global.lstFarmerNames;
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 if (filterByEmployee != null)
                 {
-
                     List<User> user;
                     HttpResponseMessage httpResponse = Global.httpClient.GetAsync("Users").Result;
                     user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
 
                     if (httpResponse.IsSuccessStatusCode)
                     {
-                        Global.EmployeeUserId = user.Where(x => x.Name.ToLower().Equals(filterByEmployee.Name)).Select(x => x.UserId).FirstOrDefault();
-                        RedirectToAction("ViewEmployeeHistory", "Products");
-                    }
+                        try
+                        {
+                            Global.EmployeeUserId = user.Where(x => x.Name.Equals(filterByEmployee.Name)).Select(x => x.UserId).First();
+                            return RedirectToAction("FarmerProductHistory", "Products");
+                        }
+                        catch (System.InvalidOperationException e) 
+                        {
+                            throw e;
+                        }
+                        }
                     else
                     {
                         return View();
                     }
                 }
+                else
+                {
+                    return View();
+                }
             }
             return View();
+        }
+
+
+        // GET: Products/FilterByDate
+        public ActionResult FilterByDate() 
+        {
+            return View();
+        }
+
+        // POST: Products/FilterByDate
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult FilterByDate([Bind("StartDate, EndDate")] FilterByDate filterByDate) 
+        {
+            if (ModelState.IsValid) 
+            {
+                Global.filterStartDate = filterByDate.StartDate;
+                Global.filterEndDate= filterByDate.EndDate;
+
+                return RedirectToAction("ViewDateFilter", "Products");
+            }
+            return View();
+        }
+
+        // GET: Products/FilterByType
+        public ActionResult FilterByType()
+        {
+            Global.populateProductType();
+            ViewData["ProductType"] = Global.lstProductType;
+            return View();
+        }
+
+        // POST: Products/FilterByType
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult FilterByType([Bind("ProductType")] FilterByType filterByType)
+        {
+            if (ModelState.IsValid)
+            {
+                Global.filterType = filterByType.ProductType;
+
+                return RedirectToAction("ViewTypeFilter", "Products");
+            }
+            return View();
+        }
+
+        // GET: Products/ViewDateFilter
+        public ActionResult ViewDateFilter()
+        {
+            HttpResponseMessage httpResponse;
+            List<UsersProduct> usersProduct;
+            List<Product> product;
+            List<ViewHistory> viewHistories = new List<ViewHistory>();
+            ViewHistory vh;
+
+            // GET
+            httpResponse = Global.httpClient.GetAsync("UsersProducts").Result;
+            usersProduct = httpResponse.Content.ReadAsAsync<List<UsersProduct>>().Result;
+            //GET
+            httpResponse = Global.httpClient.GetAsync("Products").Result;
+            product = httpResponse.Content.ReadAsAsync<List<Product>>().Result;
+
+            // https://stackoverflow.com/questions/6253656/how-do-i-join-two-lists-using-linq-or-lambda-expressions
+            var joinTables = usersProduct.Join(product, x => x.ProductId, y => y.ProductId,
+                (x, y) => new
+                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId }).ToList();
+
+
+            viewHistories.Clear();
+            joinTables.ForEach(i =>
+            {
+                vh = new ViewHistory(i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
+                viewHistories.Add(vh);
+            });
+
+            // filter the list only for the current user to see his/her details
+            return View(viewHistories.Where(x => x.UserId.Equals(Global.EmployeeUserId) && (x.ProductDate >= Global.filterStartDate && x.ProductDate <= Global.filterEndDate)).ToList());
+        }
+
+        // GET: Products/FilterByType
+        public IActionResult ViewTypeFilter()
+        {
+            HttpResponseMessage httpResponse;
+            List<UsersProduct> usersProduct;
+            List<Product> product;
+            List<ViewHistory> viewHistories = new List<ViewHistory>();
+            ViewHistory vh;
+
+            // GET
+            httpResponse = Global.httpClient.GetAsync("UsersProducts").Result;
+            usersProduct = httpResponse.Content.ReadAsAsync<List<UsersProduct>>().Result;
+            //GET
+            httpResponse = Global.httpClient.GetAsync("Products").Result;
+            product = httpResponse.Content.ReadAsAsync<List<Product>>().Result;
+
+            // https://stackoverflow.com/questions/6253656/how-do-i-join-two-lists-using-linq-or-lambda-expressions
+            var joinTables = usersProduct.Join(product, x => x.ProductId, y => y.ProductId,
+                (x, y) => new
+                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId }).ToList();
+
+
+            viewHistories.Clear();
+            joinTables.ForEach(i =>
+            {
+                vh = new ViewHistory(i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
+                viewHistories.Add(vh);
+            });
+
+            // filter the list only for the current user to see his/her details
+            return View(viewHistories.Where(x => x.UserId.Equals(Global.EmployeeUserId) && x.ProductType.Equals(Global.filterType)).ToList());
         }
     }
 }

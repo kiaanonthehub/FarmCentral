@@ -14,6 +14,9 @@ namespace FarmCentralWebApp
         public static string currentUserRole;
         public static int currentUserId;
         public static int EmployeeUserId;
+        public static string filterType;
+        public static DateTime filterStartDate;
+        public static DateTime filterEndDate;
         public static List<SelectListItem> lstProductType = new List<SelectListItem>();
         public static List<SelectListItem> lstFarmerNames = new List<SelectListItem>();
 
@@ -69,7 +72,7 @@ namespace FarmCentralWebApp
                 var farmers = user.Where(x => x.Role.Equals("Farmer")).ToList();
 
                 lstFarmerNames.Clear();
-                farmers.ForEach(x => lstFarmerNames.Add(new SelectListItem { Text = x.Name, Value = x.Name }));
+                farmers.ForEach(x => lstFarmerNames.Add(new SelectListItem {Text = x.Name, Value = x.Name }));
             }
         }
 
