@@ -123,8 +123,10 @@ namespace FarmCentralWebApp.Controllers
             HttpResponseMessage httpResponse = Global.httpClient.GetAsync("Users").Result;
             user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
 
+            String currentEmail = user.Where(x=> x.UserId == Global.currentUserId).Select(x=>x.Email).FirstOrDefault();
+
             // linq query to find the farmers password
-            int id = user.Where(x => x.Email.ToLower().Equals(reset.Email.ToLower())).Select(x => x.UserId).FirstOrDefault();
+            int id = user.Where(x => x.Email.ToLower().Equals(currentEmail.ToLower())).Select(x => x.UserId).FirstOrDefault();
             //string password = user.Where(x => x.Email.ToLower().Equals(reset.Email.ToLower())).Select(x => x.Password).FirstOrDefault();
 
             // update and hash the farmers password to new password
