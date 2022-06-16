@@ -56,8 +56,12 @@ namespace FarmCentralWebApp.Controllers
                         {
                             Global.GetUserId(userEmail.Email);
                             Global.currentUserRole = userRole;
-                            return RedirectToAction("Index", "Home"); // this will be the home nav page for the employee
-                        }
+                            if (userRole.Equals("Employee"))
+                            {
+                                return RedirectToAction("Index", "Home"); // this will be the home nav page for the employee
+                            }
+                            else if(userRole.Equals("Farmer")) { return RedirectToAction("ResetPassword", "Users"); }
+                            }
                         else
                         {
                             ViewBag.UserError = login.Email + " role is invalid. Please try again.";

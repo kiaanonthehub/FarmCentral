@@ -4,28 +4,25 @@
     ViewData["Title"] = "ViewDateFilter";
 }
 
-<h1>ViewDateFilter</h1>
+<h3> Results filtered by : Product Added Date</h3>
 
 <p>
-    <a asp-action="Create">Create New</a>
+     <a asp-action="FarmerProductHistory">View All</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.UserId)
+                Name of Product
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ProductName)
+                Product type/category
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Quantity)
+                Quantity/Stock
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ProductType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ProductDate)
+                Date added
             </th>
             <th></th>
         </tr>
@@ -34,24 +31,22 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.UserId)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.ProductName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.ProductType)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ProductDate)
+                @Html.DisplayFor(modelItem => item.Quantity)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                @{var dateFormat = item.ProductDate.ToString("D");}
+                @Html.DisplayFor(modelItem => dateFormat)
+                
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new {  id=item.UsersProductId}) |
+                @Html.ActionLink("Delete", "Delete", new {  id=item.UsersProductId  })
             </td>
         </tr>
 }

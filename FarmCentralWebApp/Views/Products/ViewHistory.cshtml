@@ -4,25 +4,25 @@
     ViewData["Title"] = "ViewHistory";
 }
 
-<h1>ViewHistory</h1>
+<h1>View Product's History</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-controller="Home" asp-action="Index">Back to Dashboard</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.ProductName)
+                Name of Product
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ProductType)
+                Product type/category
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Quantity)
+                Quantity/Stock
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ProductDate)
+                Date added
             </th>
             <th></th>
         </tr>
@@ -40,7 +40,9 @@
                 @Html.DisplayFor(modelItem => item.Quantity)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ProductDate)
+                @{var dateFormat = item.ProductDate.ToString("D");}
+                @Html.DisplayFor(modelItem => dateFormat)
+                
             </td>
         </tr>
 }

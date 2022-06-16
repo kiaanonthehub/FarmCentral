@@ -2,7 +2,67 @@
     ViewData["Title"] = "Home Page";
 }
 
+<style>
+    .card-img-top {
+    
+        width: 100%;
+        height: 15vw;
+        object-fit:cover;
+    }
+
+</style>
+
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Farmer's Central</h1>
+    <br>
+    <br>
+    <div class="card-group">
+        <div class="card">
+            <img class="card-img" src="~/img/add-user.png" alt="Card image cap">
+            <br />
+            <br />
+            <div class="card-body">
+                <h5 class="card-title">Create Farmer Account</h5>
+                <p class="card-text">Navigate to Create Farmer Account View. This shall allow the logged‐in employee to add a new farmer to the database.</p>
+                <br />
+                <a href="@Url.Action("CreateAccount","Users")">Create farmer account</a>
+            </div>
+        </div>
+        <div class="card">
+            <img class="card-img" src="~/img/research.png" alt="Card image cap">
+            <br />
+            <br />
+            <div class="card-body">
+                <h5 class="card-title">Farmer History</h5>
+                <p class="card-text">Navigate to Farmer product's View. This shall allow a logged‐in employee to view the list of all the products ever supplied by a specific farmer.</p>
+            <br />
+                <a href="@Url.Action("SelectFarmer","Products")">View products history </a>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="card-group">
+        <div class="card">
+            <img class="card-img" src="~/img/info(2).png" alt="Card image cap">
+            <br />
+            <br />
+            <div class="card-body">
+                <h5 class="card-title">About</h5>
+                <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
+            <br />
+                <a href="@Url.Action("About","Home")">View About</a>
+            </div>
+        </div>
+        <div class="card">
+            <img class="card-img" src="~/img/compliant.png" alt="Card image cap">
+           <br />
+            <br />
+            <div class="card-body">
+                <h5 class="card-title">Privacy</h5>
+                <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
+            <br />
+                <a href="@Url.Action("Privacy","Home")">View Privacy</a>
+            </div>
+        </div>
+    </div>
 </div>

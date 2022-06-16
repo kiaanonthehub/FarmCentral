@@ -13,6 +13,9 @@ namespace FarmCentralWebApp
         // static fields
         public static string currentUserRole;
         public static int currentUserId;
+        public static String currentFullname;
+        public static String currentEmail;
+        public static String viewFarmerFullname;
         public static int EmployeeUserId;
         public static int editId;
         public static int deleteId;

@@ -4,7 +4,7 @@
     ViewData["Title"] = "FarmerProductHistory";
 }
 
-<h1>FarmerProductHistory</h1>
+<h3>History of Farmer: @Global.viewFarmerFullname</h3>
 
 <p>
    Filter by <a asp-action="FilterByDate">Date</a> | <a asp-action="FilterByType">Product Type</a>
@@ -13,16 +13,16 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.ProductName)
+                Name of Product
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ProductType)
+                Product type/category
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Quantity)
+                Quantity/Stock
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ProductDate)
+                Date added
             </th>
             <th></th>
         </tr>
@@ -40,7 +40,9 @@
                 @Html.DisplayFor(modelItem => item.Quantity)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ProductDate)
+                @{var dateFormat = item.ProductDate.ToString("D");}
+                @Html.DisplayFor(modelItem => dateFormat)
+                
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new {  id=item.UsersProductId  }) |

@@ -317,6 +317,7 @@ namespace FarmCentralWebApp.Controllers
                         try
                         {
                             Global.EmployeeUserId = user.Where(x => x.Name.Equals(filterByEmployee.Name)).Select(x => x.UserId).First();
+                            Global.viewFarmerFullname = filterByEmployee.Name.ToString();
                             return RedirectToAction("FarmerProductHistory", "Products");
                         }
                         catch (System.InvalidOperationException e)
