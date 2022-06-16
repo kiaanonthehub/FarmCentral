@@ -43,7 +43,7 @@ namespace FarmCentralWebApp
             new SelectListItem {Text = "Farmer" , Value = "Farmer"},
         };
 
-
+        // method to populate a list of type of products
         public static void populateProductType()
         {
             List<ProductType> product;
@@ -54,6 +54,7 @@ namespace FarmCentralWebApp
             product.ForEach(x => lstProductType.Add(new SelectListItem { Text = x.ProductType1, Value = x.ProductType1 }));
         }
 
+        // method to get the user id when a employee logs in, api get request made
         public static void GetUserId(String email)
         {
             if (email != null)
@@ -66,6 +67,7 @@ namespace FarmCentralWebApp
             }
         }
 
+        // method to get the farmers in the database api get request made
         public static void GetFarmers()
         {
             List<User> user;

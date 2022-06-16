@@ -30,18 +30,26 @@ namespace FarmCentralWebApp.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Login([Bind("Email,Password,Role")] Login login)
         {
+            // initialise view bag
             ViewData["Roles"] = Global.lstRoles;
+
+            // instantiate view model object
             List<User> user;
+
+            // instantiate HttpResponseMessage obj and make GET api request
             HttpResponseMessage httpResponse = Global.httpClient.GetAsync("Users").Result;
             user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
 
+            // use linq to filter properties needed
             var userEmail = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).FirstOrDefault();
             var userPassword = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.Password).FirstOrDefault();
             var userRole = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.Role).FirstOrDefault();
             var userId = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.UserId).FirstOrDefault();
 
+            // check if the email is null
             if (userEmail == null)
             {
+                // populate the viewbag
                 ViewBag.UserError = "User Not Found. Please try again.";
                 return RedirectToAction("Login", "Users");
             }
@@ -55,12 +63,13 @@ namespace FarmCentralWebApp.Controllers
                     {
                         if (userRole.Equals(login.Role))
                         {
+                            // initialise static fields
                             Global.GetUserId(userEmail.Email);
                             Global.currentUserRole = userRole;
                             Global.currentFullname = user.Where(x => x.UserId == Global.currentUserId).Select(x => x.Name).FirstOrDefault().ToString() + " " + user.Where(x => x.UserId == Global.currentUserId).Select(x => x.Surname).FirstOrDefault().ToString();
                             if (userRole.Equals("Employee"))
                             {
-                                return RedirectToAction("Index", "Home"); // this will be the home nav page for the employee
+                                return RedirectToAction("Index", "Home"); 
                             }
                             else if (userRole.Equals("Farmer")) { return RedirectToAction("ResetPassword", "Users"); }
                         }
@@ -97,15 +106,24 @@ namespace FarmCentralWebApp.Controllers
         {
             try
             {
+                // initiase view model instance
                 user.Role = "Farmer";
+                
+                // hash password
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+                
+                // get the farmers full name
                 Global.currentFullname = user.Name + " " + user.Surname;
+                
+                // POST api request made 
                 HttpResponseMessage httpResponse = Global.httpClient.PostAsJsonAsync("Users", user).Result;
                 if (httpResponse.IsSuccessStatusCode)
                 {
+                    // initialise static fields
                     Global.GetUserId(user.Email);
 
-                    return RedirectToAction("AddProduct", "Products"); // redirect the employee to add a product or nav page???
+                    // redirect the employee to add a product 
+                    return RedirectToAction("AddProduct", "Products"); 
                 }
                 else { return View(user); }
             }
@@ -150,11 +168,11 @@ namespace FarmCentralWebApp.Controllers
                 updatedUser.Password = BCrypt.Net.BCrypt.HashPassword(reset.Password);
             }
 
-            httpResponse = Global.httpClient.PutAsJsonAsync(String.Format("Users/{0}", id), updatedUser).Result; //// TEST THIS !!
+            httpResponse = Global.httpClient.PutAsJsonAsync(String.Format("Users/{0}", id), updatedUser).Result; 
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                return RedirectToAction("Index", "Home"); // this will be the home nav page for the employee
+                return RedirectToAction("AddProduct", "Products"); // this will be the home nav page for the employee
             }
             else
             {
@@ -163,6 +181,7 @@ namespace FarmCentralWebApp.Controllers
             }
         }
 
+        // method to initialise all static fields
         public void Initialise()
         {
             Global.currentUserRole = "";
