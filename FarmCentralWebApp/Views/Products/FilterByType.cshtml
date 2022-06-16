@@ -13,7 +13,7 @@
         <form asp-action="FilterByType">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="ProductType" class="control-label"></label>
+                <label class="control-label">Product type/category</label>
                 <select asp-for="ProductType" class="form-control" asp-items="@ViewBag.ProductType" ></select>
                 <span asp-validation-for="ProductType" class="text-danger"></span>
             </div>

@@ -163,7 +163,7 @@ namespace FarmCentralWebApp.Controllers
 
                 if (httpResponse.IsSuccessStatusCode)
                 {
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("ViewHistory", "Products");
                 }
                 else { return View(storeProduct); }
             }

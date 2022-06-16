@@ -4,16 +4,16 @@
     ViewData["Title"] = "AddProductType";
 }
 
-<h1>AddProductType</h1>
+<h2>Product Type</h2>
+<h4>Add a product type/category for a Product to be categorised when adding new products</h4>
 
-<h4>ProductType</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="AddProductType">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="ProductType1" class="control-label"></label>
+                <label class="control-label">Product type/category</label>
                 <input asp-for="ProductType1" class="form-control" type="text" />
                 <span asp-validation-for="ProductType1" class="text-danger"></span>
             </div>

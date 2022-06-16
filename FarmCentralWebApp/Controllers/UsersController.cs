@@ -18,6 +18,7 @@ namespace FarmCentralWebApp.Controllers
         // GET: UsersController/Login
         public ActionResult Login()
         {
+            Initialise();
             ViewData["Roles"] = Global.lstRoles;
             Global.currentUserRole = null;
             return View();
@@ -56,12 +57,13 @@ namespace FarmCentralWebApp.Controllers
                         {
                             Global.GetUserId(userEmail.Email);
                             Global.currentUserRole = userRole;
+                            Global.currentFullname = user.Where(x => x.UserId == Global.currentUserId).Select(x => x.Name).FirstOrDefault().ToString() + " " + user.Where(x => x.UserId == Global.currentUserId).Select(x => x.Surname).FirstOrDefault().ToString();
                             if (userRole.Equals("Employee"))
                             {
                                 return RedirectToAction("Index", "Home"); // this will be the home nav page for the employee
                             }
-                            else if(userRole.Equals("Farmer")) { return RedirectToAction("ResetPassword", "Users"); }
-                            }
+                            else if (userRole.Equals("Farmer")) { return RedirectToAction("ResetPassword", "Users"); }
+                        }
                         else
                         {
                             ViewBag.UserError = login.Email + " role is invalid. Please try again.";
@@ -97,15 +99,16 @@ namespace FarmCentralWebApp.Controllers
             {
                 user.Role = "Farmer";
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
-
+                Global.currentFullname = user.Name + " " + user.Surname;
                 HttpResponseMessage httpResponse = Global.httpClient.PostAsJsonAsync("Users", user).Result;
                 if (httpResponse.IsSuccessStatusCode)
                 {
                     Global.GetUserId(user.Email);
+
                     return RedirectToAction("AddProduct", "Products"); // redirect the employee to add a product or nav page???
                 }
                 else { return View(user); }
-                }
+            }
             catch
             {
                 return View();
@@ -127,7 +130,7 @@ namespace FarmCentralWebApp.Controllers
             HttpResponseMessage httpResponse = Global.httpClient.GetAsync("Users").Result;
             user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
 
-            String currentEmail = user.Where(x=> x.UserId == Global.currentUserId).Select(x=>x.Email).FirstOrDefault();
+            String currentEmail = user.Where(x => x.UserId == Global.currentUserId).Select(x => x.Email).FirstOrDefault();
 
             // linq query to find the farmers password
             int id = user.Where(x => x.Email.ToLower().Equals(currentEmail.ToLower())).Select(x => x.UserId).FirstOrDefault();
@@ -158,6 +161,16 @@ namespace FarmCentralWebApp.Controllers
                 ViewBag.UserUpdatePassword = "Failed to update password.";
                 return View();
             }
+        }
+
+        public void Initialise()
+        {
+            Global.currentUserRole = "";
+            Global.currentUserId = 0;
+            Global.currentFullname = "";
+            Global.currentEmail = "";
+            Global.viewFarmerFullname = "";
+            Global.EmployeeUserId = 0;
         }
     }
 }

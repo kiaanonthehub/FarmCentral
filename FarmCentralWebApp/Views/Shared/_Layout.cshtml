@@ -11,21 +11,66 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FarmCentralWebApp</a>
+                      <a class="navbar-brand" >Farmers Central</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+                @{ if(Global.currentUserRole.Equals("Farmer")){
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1">
+                                  <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Create
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            <a class="dropdown-item" href="@Url.Action("AddProduct","Products")">Create Product</a>
+                                             <a class="dropdown-item" href="@Url.Action("AddProductType","Products")">Create Category</a>
+                                            @*<a class="dropdown-item" href="#">Another action</a>*@
+                                        </div>
+                                    </li>
+                                      <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="ViewHistory">View History</a>
+                            </li>
+                        </ul>
+                    </div>
+                }}
+            </div>
+                        <div class="nav justify-content-end">
+                @{
+                    if (Global.currentUserId > 0)
+                    {
+                        if (Global.currentUserRole.Equals("Employee"))
+                        {
+                                        <ul class="nav justify-content-end">
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="@Url.Action("Index","Home")">Dashboard</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="@Url.Action("About","Home")">About</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="@Url.Action("Privacy","Home")">Privacy</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" style="color: darkgray" href="@Url.Action("Login","Users")">@Global.currentFullname | Logout</a>
+                                            </li>
+                                        </ul>
+                        }else{
+                                         <ul class="nav justify-content-end">
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="@Url.Action("About","Home")">About</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="@Url.Action("Privacy","Home")">Privacy</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" style="color: darkgray" href="@Url.Action("Login","Users")">@Global.currentFullname | Logout</a>
+                                            </li>
+                                        </ul>
+                        }
+                    }
+                }
             </div>
         </nav>
     </header>
@@ -37,7 +82,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2022 - FarmCentralWebApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2022 - ST10116983 | Kiaan Maharaj
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
