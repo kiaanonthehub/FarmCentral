@@ -1,4 +1,5 @@
 ﻿using FarmCentralWebApp.Models;
+using FarmCentralWebApp.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,8 @@ namespace FarmCentralWebApp
         // static class constructor
         static Global()
         {
-            httpClient.BaseAddress = new Uri("http://localhost:8273/api/");
+            //httpClient.BaseAddress = new Uri("http://localhost:8273/api/");
+            httpClient.BaseAddress = new Uri("https://farmercentralapi.azurewebsites.net/api/");
             httpClient.DefaultRequestHeaders.Clear();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
@@ -51,7 +53,15 @@ namespace FarmCentralWebApp
             product = httpResponse.Content.ReadAsAsync<List<ProductType>>().Result;
 
             lstProductType.Clear();
-            product.ForEach(x => lstProductType.Add(new SelectListItem { Text = x.ProductType1, Value = x.ProductType1 }));
+           
+            //product.ForEach(x => lstProductType.Add(new SelectListItem { Text = x.ProductType1.Distinct().ToString() , Value = x.ProductType1.Distinct().ToString() })); // 25 items - dont work
+
+            // filters a distinct list
+            var filter = product.Select(x=> x.ProductType1).Distinct().ToList(); // 11 items - works
+
+            // populate the drop down
+            filter.ForEach(x=> lstProductType.Add(new SelectListItem { Text = x , Value = x}));            
+            
         }
 
         // method to get the user id when a employee logs in, api get request made
