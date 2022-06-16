@@ -14,6 +14,8 @@ namespace FarmCentralWebApp
         public static string currentUserRole;
         public static int currentUserId;
         public static int EmployeeUserId;
+        public static int editId;
+        public static int deleteId;
         public static string filterType;
         public static DateTime filterStartDate;
         public static DateTime filterEndDate;

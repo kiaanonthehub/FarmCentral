@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace FarmCentralWebApp.ViewModels
 {
@@ -10,8 +9,9 @@ namespace FarmCentralWebApp.ViewModels
 
         }
 
-        public ViewHistory(int userId, string productName, int quantity, string productType, DateTime productDate)
+        public ViewHistory(int userProductId, int userId, string productName, int quantity, string productType, DateTime productDate)
         {
+            UsersProductId = userProductId;
             UserId = userId;
             ProductName = productName;
             Quantity = quantity;
@@ -19,6 +19,7 @@ namespace FarmCentralWebApp.ViewModels
             ProductDate = productDate;
         }
 
+        public int UsersProductId { get; set; }
         public int UserId { get; set; }
         public string ProductName { get; set; }
         public int Quantity { get; set; }

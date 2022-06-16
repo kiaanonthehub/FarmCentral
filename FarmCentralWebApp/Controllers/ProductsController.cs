@@ -37,7 +37,7 @@ namespace FarmCentralWebApp.Controllers
             // https://stackoverflow.com/questions/6253656/how-do-i-join-two-lists-using-linq-or-lambda-expressions
             var joinTables = usersProduct.Join(product, x => x.ProductId, y => y.ProductId,
                 (x, y) => new
-                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId }).ToList();
+                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId, x.UsersProductId }).ToList();
 
             //foreach (var i in joinTables)
             //{
@@ -50,7 +50,7 @@ namespace FarmCentralWebApp.Controllers
             viewHistories.Clear();
             joinTables.ForEach(i =>
             {
-                vh = new ViewHistory(i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
+                vh = new ViewHistory(i.UsersProductId, i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
                 viewHistories.Add(vh);
             });
 
@@ -176,28 +176,69 @@ namespace FarmCentralWebApp.Controllers
         // GET: ProductsController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            Global.editId = id;
+            Global.populateProductType();
+            ViewData["ProductType"] = Global.lstProductType;
+
+            HttpResponseMessage httpResponse = Global.httpClient.GetAsync(String.Format("UsersProducts/{0}", id)).Result;
+            return View(httpResponse.Content.ReadAsAsync<ViewHistory>().Result);
         }
 
         // POST: ProductsController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(ViewHistory viewHistory)
         {
-            try
+
+            Global.populateProductType();
+            ViewData["ProductType"] = Global.lstProductType;
+
+            List<UsersProduct> lstUsersProducts;
+            HttpResponseMessage httpResponse = Global.httpClient.GetAsync(String.Format("UsersProducts")).Result;
+            lstUsersProducts = httpResponse.Content.ReadAsAsync<List<UsersProduct>>().Result;
+
+            List<UsersProduct> filter = lstUsersProducts.Where(x => x.UsersProductId == Global.editId).ToList();
+
+            if (filter != null)
             {
-                return RedirectToAction(nameof(Index));
+                UsersProduct usersProduct = new UsersProduct();
+
+                foreach (var i in filter)
+                {
+                    usersProduct.UsersProductId = i.UsersProductId;
+                    usersProduct.ProductId = i.ProductId;
+                    usersProduct.ProductTypeId = i.ProductTypeId;
+                    usersProduct.UserId = i.UserId;
+
+                    // updated
+                    usersProduct.Quantity = viewHistory.Quantity;
+                    usersProduct.ProductType = viewHistory.ProductType;
+                    usersProduct.ProductDate = viewHistory.ProductDate;
+                }
+
+                httpResponse = Global.httpClient.PutAsJsonAsync(String.Format("UsersProducts/{0}", usersProduct.UsersProductId), usersProduct).Result;
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("FarmerProductHistory", "Products");
+                }
+                else { return RedirectToAction("Index", "Home"); }
             }
-            catch
-            {
-                return View();
-            }
+            else { return RedirectToAction("Index", "Home"); }
         }
 
         // GET: ProductsController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            Global.deleteId = id;
+            HttpResponseMessage httpResponse = Global.httpClient.DeleteAsync(String.Format("UsersProducts/{0}", id)).Result;
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                return RedirectToAction("FarmerProductHistory", "Products");
+            }
+            else
+            {
+                return RedirectToAction("Idnex", "Home");
+            }
         }
 
         // POST: ProductsController/Delete/5
@@ -234,13 +275,13 @@ namespace FarmCentralWebApp.Controllers
             // https://stackoverflow.com/questions/6253656/how-do-i-join-two-lists-using-linq-or-lambda-expressions
             var joinTables = usersProduct.Join(product, x => x.ProductId, y => y.ProductId,
                 (x, y) => new
-                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId }).ToList();
+                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId, x.UsersProductId }).ToList();
 
 
             viewHistories.Clear();
             joinTables.ForEach(i =>
             {
-                vh = new ViewHistory(i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
+                vh = new ViewHistory(i.UsersProductId, i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
                 viewHistories.Add(vh);
             });
 
@@ -278,11 +319,11 @@ namespace FarmCentralWebApp.Controllers
                             Global.EmployeeUserId = user.Where(x => x.Name.Equals(filterByEmployee.Name)).Select(x => x.UserId).First();
                             return RedirectToAction("FarmerProductHistory", "Products");
                         }
-                        catch (System.InvalidOperationException e) 
+                        catch (System.InvalidOperationException e)
                         {
                             throw e;
                         }
-                        }
+                    }
                     else
                     {
                         return View();
@@ -298,7 +339,7 @@ namespace FarmCentralWebApp.Controllers
 
 
         // GET: Products/FilterByDate
-        public ActionResult FilterByDate() 
+        public ActionResult FilterByDate()
         {
             return View();
         }
@@ -306,12 +347,12 @@ namespace FarmCentralWebApp.Controllers
         // POST: Products/FilterByDate
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult FilterByDate([Bind("StartDate, EndDate")] FilterByDate filterByDate) 
+        public ActionResult FilterByDate([Bind("StartDate, EndDate")] FilterByDate filterByDate)
         {
-            if (ModelState.IsValid) 
+            if (ModelState.IsValid)
             {
                 Global.filterStartDate = filterByDate.StartDate;
-                Global.filterEndDate= filterByDate.EndDate;
+                Global.filterEndDate = filterByDate.EndDate;
 
                 return RedirectToAction("ViewDateFilter", "Products");
             }
@@ -359,13 +400,13 @@ namespace FarmCentralWebApp.Controllers
             // https://stackoverflow.com/questions/6253656/how-do-i-join-two-lists-using-linq-or-lambda-expressions
             var joinTables = usersProduct.Join(product, x => x.ProductId, y => y.ProductId,
                 (x, y) => new
-                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId }).ToList();
+                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId, x.UsersProductId }).ToList();
 
 
             viewHistories.Clear();
             joinTables.ForEach(i =>
             {
-                vh = new ViewHistory(i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
+                vh = new ViewHistory(i.UsersProductId, i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
                 viewHistories.Add(vh);
             });
 
@@ -392,13 +433,13 @@ namespace FarmCentralWebApp.Controllers
             // https://stackoverflow.com/questions/6253656/how-do-i-join-two-lists-using-linq-or-lambda-expressions
             var joinTables = usersProduct.Join(product, x => x.ProductId, y => y.ProductId,
                 (x, y) => new
-                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId }).ToList();
+                { y.ProductName, x.Quantity, x.ProductType, x.ProductDate, x.UserId, x.UsersProductId }).ToList();
 
 
             viewHistories.Clear();
             joinTables.ForEach(i =>
             {
-                vh = new ViewHistory(i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
+                vh = new ViewHistory(i.UsersProductId, i.UserId, i.ProductName, i.Quantity, i.ProductType, i.ProductDate);
                 viewHistories.Add(vh);
             });
 
