@@ -51,7 +51,7 @@ namespace FarmCentralWebApp.Controllers
             {
                 // populate the viewbag
                 ViewBag.UserError = "User Not Found. Please try again.";
-                return RedirectToAction("Login", "Users");
+                return View(login);
             }
             else
             {
@@ -111,19 +111,13 @@ namespace FarmCentralWebApp.Controllers
                 
                 // hash password
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
-                
-                // get the farmers full name
-                Global.currentFullname = user.Name + " " + user.Surname;
-                
+                                
                 // POST api request made 
                 HttpResponseMessage httpResponse = Global.httpClient.PostAsJsonAsync("Users", user).Result;
                 if (httpResponse.IsSuccessStatusCode)
                 {
-                    // initialise static fields
-                    Global.GetUserId(user.Email);
-
-                    // redirect the employee to add a product 
-                    return RedirectToAction("AddProduct", "Products"); 
+                    // redirect the employee to home page
+                    return RedirectToAction("Index", "Home"); 
                 }
                 else { return View(user); }
             }
@@ -133,12 +127,13 @@ namespace FarmCentralWebApp.Controllers
             }
         }
 
+        // GET : UsersController/ResetPassword 
         public ActionResult ResetPassword()
         {
             return View();
         }
 
-        // POST: UsersController/Login
+        // POST: UsersController/ResetPassword
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult ResetPassword([Bind("Email,Password,ConfirmPassword")] ResetPassword reset)
@@ -172,7 +167,7 @@ namespace FarmCentralWebApp.Controllers
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                return RedirectToAction("AddProduct", "Products"); // this will be the home nav page for the employee
+                return RedirectToAction("ViewHistory", "Products"); // this will be the home nav page for the employee
             }
             else
             {
@@ -193,8 +188,3 @@ namespace FarmCentralWebApp.Controllers
         }
     }
 }
-
-/*
- * Code Attribution
- * Aesthetics
- */
