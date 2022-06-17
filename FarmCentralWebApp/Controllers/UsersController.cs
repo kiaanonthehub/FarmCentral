@@ -167,7 +167,8 @@ namespace FarmCentralWebApp.Controllers
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                return RedirectToAction("ViewHistory", "Products"); // this will be the home nav page for the employee
+                // this will be the home nav page for the employee
+                return RedirectToAction("ViewHistory", "Products"); 
             }
             else
             {
