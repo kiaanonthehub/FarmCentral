@@ -7,9 +7,11 @@ You will require an internet connection,to run the application, which will consu
 
 ------
 LINKS
-Web App : https://st10116983farmcentral.azurewebsites.net/
+Website :
+https://st10116983farmcentral.azurewebsites.net/
 
-API : https://farmercentralapi.azurewebsites.net/api/
+API : 
+https://farmercentralapi.azurewebsites.net/api/
 https://farmercentralapi.azurewebsites.net/api/Users
 https://farmercentralapi.azurewebsites.net/api/usersproducts
 https://farmercentralapi.azurewebsites.net/api/products
