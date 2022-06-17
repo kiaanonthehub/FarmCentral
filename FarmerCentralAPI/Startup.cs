@@ -1,17 +1,11 @@
 using FarmerCentralAPI.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FarmerCentralAPI
 {
@@ -30,10 +24,7 @@ namespace FarmerCentralAPI
 
             services.AddControllers();
             services.AddSwaggerGen();
-                //c =>
-            //{
-            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "FarmerCentralAPI", Version = "v1" });
-            //});
+            //services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "FarmerCentralAPI", Version = "v1" }); }); // Uncomment if running locally
             services.AddDbContext<FarmCentralContext>(options => options.UseSqlServer(Configuration.GetConnectionString("SqlConnection")));
         }
 
