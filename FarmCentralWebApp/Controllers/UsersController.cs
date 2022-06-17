@@ -36,61 +36,69 @@ namespace FarmCentralWebApp.Controllers
             // instantiate view model object
             List<User> user;
 
-            // instantiate HttpResponseMessage obj and make GET api request
-            HttpResponseMessage httpResponse = Global.httpClient.GetAsync("Users").Result;
-            user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
-
-            // use linq to filter properties needed
-            var userEmail = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).FirstOrDefault();
-            var userPassword = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.Password).FirstOrDefault();
-            var userRole = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.Role).FirstOrDefault();
-            var userId = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.UserId).FirstOrDefault();
-
-            // check if the email is null
-            if (userEmail == null)
+            try
             {
-                // populate the viewbag
-                ViewBag.UserError = "User Not Found. Please try again.";
-                return View(login);
-            }
-            else
+                // instantiate HttpResponseMessage obj and make GET api request
+                HttpResponseMessage httpResponse = Global.httpClient.GetAsync("Users").Result;
+                user = httpResponse.Content.ReadAsAsync<List<User>>().Result;
+           
+            if (httpResponse.IsSuccessStatusCode)
             {
-                try
+                // use linq to filter properties needed
+                var userEmail = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).FirstOrDefault();
+                var userPassword = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.Password).FirstOrDefault();
+                var userRole = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.Role).FirstOrDefault();
+                var userId = user.Where(x => x.Email.ToLower().Equals(login.Email.ToLower())).Select(x => x.UserId).FirstOrDefault();
+
+                // check if the email is null
+                if (userEmail == null)
                 {
-                    // verify if user password is the same as hashed password in the database
-                    bool verify = BCrypt.Net.BCrypt.Verify(login.Password, userPassword);
-                    if (verify)
+                    // populate the viewbag
+                    ViewBag.UserError = "User Not Found. Please try again.";
+                    return View(login);
+                }
+                else
+                {
+                    try
                     {
-                        if (userRole.Equals(login.Role))
+                        // verify if user password is the same as hashed password in the database
+                        bool verify = BCrypt.Net.BCrypt.Verify(login.Password, userPassword);
+                        if (verify)
                         {
-                            // initialise static fields
-                            Global.GetUserId(userEmail.Email);
-                            Global.currentUserRole = userRole;
-                            Global.currentFullname = user.Where(x => x.UserId == Global.currentUserId).Select(x => x.Name).FirstOrDefault().ToString() + " " + user.Where(x => x.UserId == Global.currentUserId).Select(x => x.Surname).FirstOrDefault().ToString();
-                            if (userRole.Equals("Employee"))
+                            if (userRole.Equals(login.Role))
                             {
-                                return RedirectToAction("Index", "Home"); 
+                                // initialise static fields
+                                Global.GetUserId(userEmail.Email);
+                                Global.currentUserRole = userRole;
+                                Global.currentFullname = user.Where(x => x.UserId == Global.currentUserId).Select(x => x.Name).FirstOrDefault().ToString() + " " + user.Where(x => x.UserId == Global.currentUserId).Select(x => x.Surname).FirstOrDefault().ToString();
+                                if (userRole.Equals("Employee"))
+                                {
+                                    return RedirectToAction("Index", "Home");
+                                }
+                                else if (userRole.Equals("Farmer")) { return RedirectToAction("ResetPassword", "Users"); }
                             }
-                            else if (userRole.Equals("Farmer")) { return RedirectToAction("ResetPassword", "Users"); }
+                            else
+                            {
+                                ViewBag.UserError = login.Email + " role is invalid. Please try again.";
+                                return View(login);
+                            }
                         }
                         else
                         {
-                            ViewBag.UserError = login.Email + " role is invalid. Please try again.";
+                            ViewBag.UserError = "This password is invalid. Please try again.";
                             return View(login);
                         }
                     }
-                    else
+                    catch (System.ArgumentNullException)
                     {
                         ViewBag.UserError = "This password is invalid. Please try again.";
-                        return View(login);
                     }
+                    return View(login);
                 }
-                catch (System.ArgumentNullException)
-                {
-                    ViewBag.UserError = "This password is invalid. Please try again.";
-                }
-                return View(login);
             }
+            else { ViewBag.UserError = "User Not Found. Please try again."; return View(login); }
+            }
+            catch (System.AggregateException) { return View(login); }
         }
 
         // GET: UsersController/CreateAccountEmployee
